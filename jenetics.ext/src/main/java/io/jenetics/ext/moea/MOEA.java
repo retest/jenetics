@@ -177,7 +177,7 @@ public final class MOEA {
 	private static final class Front<
 		G extends Gene<?, G>,
 		C extends Comparable<? super C>
-	> {
+		> {
 
 		final IntRange _size;
 		final Comparator<? super C> _dominance;
@@ -205,7 +205,10 @@ public final class MOEA {
 		void add(final EvolutionResult<G, C> result) {
 			if (_front == null) {
 				_optimize = result.getOptimize();
-				_front = new ParetoFront<>(this::dominance);
+				_front = new ParetoFront<>(
+					this::dominance,
+					(pt1, pt2) -> pt1.getGenotype().equals(pt2.getGenotype())
+				);
 			}
 
 			final ISeq<Phenotype<G, C>> front = front(

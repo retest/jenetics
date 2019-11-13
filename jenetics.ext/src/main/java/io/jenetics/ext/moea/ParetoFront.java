@@ -27,7 +27,9 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
+import java.util.function.BiPredicate;
 import java.util.function.ToIntFunction;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
@@ -76,6 +78,7 @@ import io.jenetics.util.Seq;
 public final class ParetoFront<T> extends AbstractSet<T> {
 
 	private final Comparator<? super T> _dominance;
+	private final BiPredicate<? super T, ? super T> _equals;
 	private final List<T> _population = new ArrayList<>();
 
 	/**
@@ -85,10 +88,17 @@ public final class ParetoFront<T> extends AbstractSet<T> {
 	 * @throws NullPointerException if the given {@code dominance} measure is
 	 *         {@code null}
 	 */
-	public ParetoFront(final Comparator<? super T> dominance) {
-		_dominance = requireNonNull(dominance);
-	}
+	//	public ParetoFront(final Comparator<? super T> dominance) {
+	//		_dominance = requireNonNull(dominance);
+	//	}
 
+	public ParetoFront(final Comparator<? super T> dominance, final BiPredicate<? super T, ? super T> equals) {
+		_dominance = requireNonNull(dominance);
+		_equals = requireNonNull(equals);
+	}
+	public ParetoFront(final Comparator<? super T> dominance) {
+		this(dominance, Objects::equals);
+	}
 	/**
 	 * Inserts an {@code element} to this pareto front.
 	 *
@@ -112,7 +122,7 @@ public final class ParetoFront<T> extends AbstractSet<T> {
 			if (cmp > 0) {
 				iterator.remove();
 				updated = true;
-			} else if (cmp < 0 || element.equals(existing)) {
+			} else if (cmp < 0 || _equals.test(element, existing) ) {
 				return updated;
 			}
 		}
